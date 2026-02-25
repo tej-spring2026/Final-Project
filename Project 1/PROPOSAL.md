@@ -1,0 +1,2 @@
+ # Idea for proposal: Stock Portfolio Analyzer
+ # I want to build an app that conducts portfolio analysis for public market investors. The user would input the stock ticker, number of shares owned, purchase price, and current price for whatever stock/stocks comprise their portfolio. My application would then take these inputs and create a portfolio summary table showing the portfolio's stock allocation, best and worst performers, total portfolio return, risk core based on the portfolios diversification. 
