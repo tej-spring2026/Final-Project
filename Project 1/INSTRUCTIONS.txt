@@ -4,6 +4,6 @@
 
 2. Copy and paste this single line below:
 
-git clone https://github.com/tej-spring2026/oim3640.git && cd "oim3640/Project 1" && python portfolio_analyzer.py
+git clone https://github.com/tej-spring2026/oim3640.git && cd "oim3640/Project 1" && python portfolio_analyzer_iteration01.py
 
 3. Follow the prompts to enter stock data and see your portfolio analysis!
