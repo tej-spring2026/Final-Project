@@ -1,0 +1,33 @@
+PORTFOLIO DATA
+============================================================
+
+Ticker: APPL
+Shares: 45.0
+Purchase Price: $202.01
+Current Price: $278.78
+
+Ticker: AMZN
+Shares: 35.0
+Purchase Price: $46.61
+Current Price: $207.72
+
+Ticker: CRWV
+Shares: 50.0
+Purchase Price: $91.06
+Current Price: $98.08
+
+Ticker: KLAC
+Shares: 13.0
+Purchase Price: $620.27
+Current Price: $1,507.99
+
+Ticker: LRCX
+Shares: 80.0
+Purchase Price: $65.00
+Current Price: $237.00
+
+Ticker: MSTR
+Shares: 3.0
+Purchase Price: $178.00
+Current Price: $133.31
+
