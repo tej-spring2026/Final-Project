@@ -1,0 +1,65 @@
+*** SAMPLE / FICTIONAL TRANSCRIPT — FOR TESTING PURPOSES ONLY ***
+*** This is not a real Palantir earnings call. Format mimics Motley Fool. ***
+
+Palantir Technologies (PLTR) Q2 2025 Earnings Call
+August 4, 2025
+
+Prepared Remarks
+
+Alex Karp -- Chief Executive Officer
+
+Good afternoon. We appreciate you joining us today. Our Q2 results were roughly in line with our expectations, though we believe the current macroeconomic environment introduces uncertainty that we want to address transparently. Revenue came in at approximately $870 million, which represents growth of about 28% year over year.
+
+We anticipate that some headwinds could persist into the second half of the year. While we remain committed to our mission, we want to be clear that the pace of certain government contract decisions may not align with our original timeline. There is no assurance that all anticipated contracts will close as expected this fiscal year.
+
+We expect that enterprise AI adoption, while growing, may take longer than we initially forecasted in certain verticals. It is possible that some customers will delay purchasing decisions given budget constraints. We are monitoring this closely.
+
+David Glazer -- Chief Financial Officer
+
+Thank you, Alex. Our adjusted free cash flow was approximately $160 million, which we believe reflects the impact of some timing differences. We estimate that roughly $40 million in revenue we anticipated could be subject to contract renegotiation or delay.
+
+Our commercial segment grew by approximately 31% in the United States. While we are encouraged by this, we think the growth rate could vary in coming quarters depending on macro conditions. We cannot guarantee that our current growth trajectory will continue at the same pace. Going forward, we remain cautious about near-term bookings visibility.
+
+Ryan Taylor -- Chief Revenue Officer
+
+Our pipeline remains solid, though deal cycles have extended. We believe this reflects broader market uncertainty rather than any weakness in our platform. We estimate that roughly a third of our late-stage deals could slip to the next quarter. We anticipate closing these deals, but we acknowledge that timing depends on customer budget approvals.
+
+We hope to return to accelerating growth by year-end. However, we want to be transparent that this is not guaranteed. There is uncertainty around some of our largest opportunities, and we estimate the impact could vary significantly. We are working hard, but we think it is prudent to set measured expectations.
+
+Questions and Answers
+
+Operator
+
+Thank you. We will now take questions. First question is from Brad Erickson at RBC Capital Markets.
+
+Brad Erickson -- RBC Capital Markets -- Analyst
+
+The growth deceleration is notable. Can you help us understand what is driving this?
+
+Alex Karp -- Chief Executive Officer
+
+We believe it is primarily a timing issue. We anticipate that deals we expected this quarter will likely close within the next one to two quarters. We estimate that roughly 60% of the slippage is attributable to government decision cycles, which can be unpredictable. We expect to recover, but we think investors should understand that there may not be a linear path.
+
+David Glazer -- Chief Financial Officer
+
+I want to add that we remain cautious on near-term guidance. We believe the macro environment could be a headwind for approximately two more quarters. We anticipate our margins may be under some pressure as we continue to invest during this slower period. We estimate expenses will grow roughly in line with revenue going forward.
+
+Operator
+
+Next question comes from Mariana Perez Mora at Bank of America.
+
+Mariana Perez Mora -- Bank of America -- Analyst
+
+Should investors be worried about competitive pressure?
+
+Alex Karp -- Chief Executive Officer
+
+We do not believe competition is the core issue here. However, we acknowledge that the market could become more competitive, which may not work in our favor. There is no assurance that our competitive position will be as strong in two years as it is today. We estimate that roughly a few of the deals we lost were partially due to pricing considerations. We think we can address this, but it is something we are monitoring closely.
+
+Ryan Taylor -- Chief Revenue Officer
+
+Going forward, we anticipate focusing more resources on deal acceleration. We believe this could help, but we want to be transparent that it depends on factors that may be outside our control. We hope to have a more favorable update when we report Q3 results.
+
+Operator
+
+Thank you all. This concludes the Palantir Q2 2025 earnings call.
