@@ -1,0 +1,22 @@
+# Environment Variables (API Keys)
+.env
+.env.local
+.env.*
+
+
+# Never commit secrets or generated output
+__pycache__/
+*.pyc
+*.pyo
+
+# Saved briefings — contains personal portfolio/P&L data
+briefings/
+
+# Personal portfolio config — contains private holdings, share counts, cost basis
+config.py
+
+# Test file — references private portfolio data
+tests/test_data_fetcher.py
+
+# Personal README — contains private information
+ignore_README.md
