@@ -1,0 +1,69 @@
+EARNINGS CALL SENTIMENT ANALYZER - RESULTS
+============================================================
+
+RANKED COMPARISON TABLE
+------------------------------------------------------------
++--------+--------------+-----------------+------------+---------------+--------------+
+|   Rank | Quarter      |   Caution Score |   Net Tone |   Hedge Ratio |   Word Count |
++========+==============+=================+============+===============+==============+
+|      1 | PLTR Q2 2025 |          0.002  |     0.0036 |        0.0084 |         6156 |
++--------+--------------+-----------------+------------+---------------+--------------+
+|      2 | PLTR Q4 2025 |          0.0017 |     0      |        0.005  |         6987 |
++--------+--------------+-----------------+------------+---------------+--------------+
+|      3 | PLTR Q3 2025 |          0.0008 |     0.0048 |        0.0055 |         7102 |
++--------+--------------+-----------------+------------+---------------+--------------+
+
+PER-QUARTER DETAIL BREAKDOWN
+------------------------------------------------------------
+
+Quarter:              PLTR Q2 2025
+File:                 C:\Users\tbikkasani1\Documents\GitHub\oim3640\Mini Project 2\sample_transcripts\Q2 2025 Earnings call PLTR Trasncript.txt
+Final Caution Score:  0.0020
+  Prepared Remarks:   0.0036 (weight: 0.55)
+  Q&A Section:        0.0000 (weight: 0.45)
+Net Tone:             0.0036
+Hedge Ratio:          0.0084
+Total Word Count:     6156
+  Prepared Words:     6156
+  Q&A Words:          0
+Positive Word Count:  78
+Negative Word Count:  56
+Uncertainty Words:    42
+Hedge Phrase Hits:    10
+
+----------------------------------------
+
+Quarter:              PLTR Q4 2025
+File:                 C:\Users\tbikkasani1\Documents\GitHub\oim3640\Mini Project 2\sample_transcripts\Q4 2025 PLTR EARNINGS.txt
+Final Caution Score:  0.0017
+  Prepared Remarks:   0.0030 (weight: 0.55)
+  Q&A Section:        0.0000 (weight: 0.45)
+Net Tone:             0.0000
+Hedge Ratio:          0.0050
+Total Word Count:     6987
+  Prepared Words:     6987
+  Q&A Words:          0
+Positive Word Count:  63
+Negative Word Count:  63
+Uncertainty Words:    29
+Hedge Phrase Hits:    6
+
+----------------------------------------
+
+Quarter:              PLTR Q3 2025
+File:                 C:\Users\tbikkasani1\Documents\GitHub\oim3640\Mini Project 2\sample_transcripts\Q3 2025 PLTR EARNINGS TRANSCRIPT.txt
+Final Caution Score:  0.0008
+  Prepared Remarks:   0.0014 (weight: 0.55)
+  Q&A Section:        0.0000 (weight: 0.45)
+Net Tone:             0.0048
+Hedge Ratio:          0.0055
+Total Word Count:     7102
+  Prepared Words:     7102
+  Q&A Words:          0
+Positive Word Count:  97
+Negative Word Count:  63
+Uncertainty Words:    31
+Hedge Phrase Hits:    8
+
+----------------------------------------
+

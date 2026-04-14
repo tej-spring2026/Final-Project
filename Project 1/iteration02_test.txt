@@ -1,0 +1,23 @@
+PORTFOLIO DATA
+============================================================
+
+Ticker: APPL
+Shares: 3.0
+Purchase Price: $30.00
+Current Price: $40.00
+
+Ticker: ERER
+Shares: 9.0
+Purchase Price: $30.00
+Current Price: $40.00
+
+Ticker: TUEK
+Shares: 21.0
+Purchase Price: $2.00
+Current Price: $1.00
+
+Ticker: HSKD
+Shares: 8.0
+Purchase Price: $10.00
+Current Price: $100.00
+
