@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Trip Not Found{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+
+    <div class="alert alert-warning shadow-sm mt-3" role="alert">
+      <h5 class="alert-heading mb-2">Couldn't plan your trip</h5>
+      <p class="mb-0">{{ message }}</p>
+    </div>
+
+    <a href="/" class="btn btn-outline-secondary mt-2">&larr; Try again</a>
+
+  </div>
+</div>
+{% endblock %}
