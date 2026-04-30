@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}{{ ticker }} — Options Builder{% endblock %}
+
+{% block nav_extra %}
+<a href="/" class="btn btn-sm btn-outline-light ms-3">← New search</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3 align-items-start">
+
+  <!-- ═══════════════════════════════════════════════════════
+       LEFT COLUMN  –  Expiration selector + chain table
+  ═══════════════════════════════════════════════════════ -->
+  <div class="col-xl-7 col-lg-7">
+    <div class="card">
+
+      <div class="card-header d-flex flex-wrap gap-2 align-items-center">
+        <span class="fw-bold fs-5 me-1">{{ ticker }}</span>
+        <span class="text-muted" id="spot-display">${{ price }}</span>
+        <div class="ms-auto d-flex align-items-center gap-2">
+          <label class="form-label mb-0 text-muted small">Expiration</label>
+          <select id="expiration-select" class="form-select form-select-sm" style="width:auto">
+            {% for exp in expirations %}
+            <option value="{{ exp }}">{{ exp }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div><!-- card-header -->
+
+      <div class="card-body p-0">
+
+        <!-- Loading state -->
+        <div id="chain-loading" class="text-center py-5 text-muted">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Loading chain…
+        </div>
+
+        <!-- Chain table (shown once loaded) -->
+        <div id="chain-container" class="d-none">
+          <div class="chain-scroll">
+            <table class="table table-sm table-hover chain-table mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th colspan="4" class="text-center border-end py-1">— CALLS —</th>
+                  <th class="text-center strike-col py-1">Strike</th>
+                  <th colspan="4" class="text-center border-start py-1">— PUTS —</th>
+                </tr>
+                <tr class="small">
+                  <th class="text-end">IV</th>
+                  <th class="text-end">Δ</th>
+                  <th class="text-end">Mid</th>
+                  <th class="text-center border-end">Add</th>
+                  <th class="text-center strike-col"></th>
+                  <th class="text-center border-start">Add</th>
+                  <th class="text-start">Mid</th>
+                  <th class="text-start">IV</th>
+                  <th class="text-start">Δ</th>
+                </tr>
+              </thead>
+              <tbody id="chain-body"></tbody>
+            </table>
+          </div><!-- chain-scroll -->
+        </div><!-- chain-container -->
+
+        <div id="chain-error" class="d-none alert alert-danger m-3 mb-2"></div>
+
+      </div><!-- card-body -->
+    </div><!-- card -->
+  </div><!-- left col -->
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       RIGHT COLUMN  –  Legs + Chart + Metrics
+  ═══════════════════════════════════════════════════════ -->
+  <div class="col-xl-5 col-lg-5">
+
+    <!-- Legs panel -->
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center py-2">
+        <span class="fw-semibold">Strategy Legs</span>
+        <button class="btn btn-sm btn-outline-secondary" onclick="clearLegs()">Clear all</button>
+      </div>
+      <div class="card-body py-2 px-3">
+        <div id="legs-empty" class="text-muted small py-1">
+          No legs added yet. Click <kbd>L</kbd> or <kbd>S</kbd> on the chain.
+        </div>
+        <div id="legs-list"></div>
+      </div>
+    </div>
+
+    <!-- P/L Chart -->
+    <div class="card mb-3">
+      <div class="card-header py-2 fw-semibold">P / L at Expiration</div>
+      <div class="card-body p-1">
+        <div id="chart-placeholder" class="text-center text-muted py-4 small">
+          Add at least one leg to see the P/L diagram.
+        </div>
+        <div id="chart" style="height:300px; display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Metrics + Greeks (hidden until legs added) -->
+    <div id="metrics-card" class="card" style="display:none">
+      <div class="card-header py-2 fw-semibold">Position Summary</div>
+      <div class="card-body p-2">
+
+        <table class="table table-sm mb-3">
+          <tbody>
+            <tr>
+              <td class="text-muted">Net Debit / Credit</td>
+              <td id="m-net" class="fw-bold text-end"></td>
+            </tr>
+            <tr>
+              <td class="text-muted">Max Profit</td>
+              <td id="m-max-profit" class="fw-bold text-success text-end"></td>
+            </tr>
+            <tr>
+              <td class="text-muted">Max Loss</td>
+              <td id="m-max-loss" class="fw-bold text-danger text-end"></td>
+            </tr>
+            <tr>
+              <td class="text-muted">Breakeven(s)</td>
+              <td id="m-breakevens" class="text-end"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="small fw-semibold text-muted mb-1">Aggregate Greeks</div>
+        <table class="table table-sm text-center mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Delta (Δ)</th>
+              <th>Gamma (Γ)</th>
+              <th>Theta (Θ)/day</th>
+              <th>Vega (ν)/1%σ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="g-delta">—</td>
+              <td id="g-gamma">—</td>
+              <td id="g-theta">—</td>
+              <td id="g-vega">—</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div><!-- metrics-card -->
+
+  </div><!-- right col -->
+</div><!-- row -->
+{% endblock %}
+
+
+{% block scripts %}
+<!-- Inject Flask variables for JavaScript -->
+<script>
+  const TICKER      = {{ ticker | tojson }};
+  const SPOT        = {{ price }};
+  const EXPIRATIONS = {{ expirations | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}
