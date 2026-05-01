@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \":*)",
+      "Bash(pip install:*)",
+      "Bash(python mbta_helper.py)",
+      "Bash(python -c \"import app; print\\('app.py imports OK'\\)\")",
+      "Bash(python -m pytest tests/test_implied_vol.py -v)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(python -c \"import yfinance; print\\('yfinance', yfinance.__version__\\)\")",
+      "Bash(python -c \"import flask_caching; print\\('flask_caching ok'\\)\")",
+      "Bash(python -m pytest tests/test_data_integration.py -v -s -m integration)",
+      "Bash(python -m pytest tests/test_black_scholes.py tests/test_implied_vol.py -v)",
+      "Bash(python -m pytest tests/test_strategies.py -v)",
+      "Bash(python -m pytest tests/test_black_scholes.py tests/test_implied_vol.py tests/test_strategies.py -v --tb=no -q)",
+      "Bash(python -m pytest tests/test_black_scholes.py tests/test_implied_vol.py tests/test_strategies.py -q --tb=no)",
+      "Bash(python -c \"import flask, flask_caching, yfinance, plotly; print\\('all imports OK'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(python app.py)",
+      "Bash(curl -s http://127.0.0.1:5000/)",
+      "Bash(curl -s \"http://127.0.0.1:5000/api/quote?ticker=SPY\")",
+      "Bash(curl -s \"http://127.0.0.1:5000/builder?ticker=SPY\")",
+      "Bash(curl -s \"http://127.0.0.1:5000/api/chain?ticker=SPY&expiration=2026-05-04\")",
+      "Bash(python debug_tsla.py)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)"
+    ]
+  }
+}

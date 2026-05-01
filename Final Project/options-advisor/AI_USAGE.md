@@ -70,3 +70,24 @@ Reviewed the diff. Ran a smoke test confirming TSLA July 2026 380 call returned 
 - Provider abstractions pay off immediately: swapping the data source touched almost no other code — only `app.py` provider instantiation and one conditional in `_fetch_chain`
 - Keeping the NR IV solver as a fallback preserves the technical work while making it optional for providers that supply Greeks directly
 - A single `DATA_PROVIDER` env var makes the swap fully reversible without any code changes — critical for Demo Day resilience
+
+---
+
+## Entry 4 — Bug diagnosis: calls showing wrong expiration data
+
+**What I asked:**
+TSLA calls were displaying what appeared to be 0DTE pricing ($0.30 mid at strike 380) while puts at the same strike showed correct July 2026 data (~$27). Suspected the cache fix from Entry 2 had not taken effect or a new bug had been introduced. Requested a systematic diagnosis with `[DIAG-*]` print statements at every layer before writing any fix.
+
+**What was generated:**
+- `[DIAG-ROUTE]` logging added to `api_chain()` to confirm Flask received the correct ticker and expiration
+- `[DIAG-CACHE]` logging added to `_fetch_chain()` to confirm cache misses were keyed by (ticker, expiration)
+- `[DIAG-PROVIDER]` logging added to `YFinanceProvider.get_chain()` to confirm what expiration yfinance received and what bid/ask it returned
+- `[DIAG-FRONTEND]` console.log added to `loadChain()` in charts.js to confirm the browser sent the right URL
+
+**What I did with it:**
+Ran the instrumented server, loaded TSLA, selected 2026-07-17. Flask logs showed two separate cache misses keyed correctly: `2026-05-01` (default selection) returned 380 call mid=$4.47; `2026-07-17` returned 380 call mid=$31.93. The UI confirmed $31.93 displayed correctly. Bug was not reproducible once a proper `.env` file with `DATA_PROVIDER=yfinance` was created — the app had previously been failing to start cleanly without it. Removed all `[DIAG-*]` instrumentation after confirming clean data.
+
+**What I learned:**
+- Systematic layered logging (frontend URL → route → cache → provider → yfinance) is the correct way to isolate where data corruption occurs — it immediately ruled out the backend and pointed to a configuration/startup issue
+- A missing `.env` file caused `config.py` to default to `DATA_PROVIDER=tradier`, which raised `RuntimeError` at startup; the app never ran against yfinance at all in those sessions
+- Always create `.env` from `.env.example` as the first setup step — a startup guard (`raise RuntimeError` when token missing) surfaces this immediately rather than silently serving wrong data
