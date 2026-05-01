@@ -125,14 +125,113 @@ def _fetch_chain(ticker: str, expiration: str) -> dict:
     return {"spot": round(S, 2), "contracts": rows}
 
 
+def _filter_chain(
+    contracts: list[dict],
+    spot: float,
+    min_strike: float | None,
+    max_strike: float | None,
+) -> tuple[list[dict], dict]:
+    """
+    Filter the full cached chain to the requested strike range.
+
+    Custom mode  (min_strike + max_strike provided):
+        Return all strikes in [min_strike, max_strike] regardless of increment.
+
+    Default mode (no params):
+        Pick a tier increment from spot, keep only grid-aligned strikes, then
+        return the 20 grid strikes below spot and 20 above spot.
+
+    Tier boundaries:
+        spot > 600  → $10 increments
+        spot >= 50  → $5 increments   (spot == 600 uses $5, spot == 50 uses $5)
+        spot < 50   → $1 increments
+    """
+    # ── Custom range ────────────────────────────────────────────────────────
+    if min_strike is not None and max_strike is not None:
+        filtered = [c for c in contracts if min_strike <= c["strike"] <= max_strike]
+        return filtered, {
+            "mode": "custom",
+            "label": f"Custom range: ${min_strike:g}–${max_strike:g}",
+        }
+
+    # ── Tier-based default ───────────────────────────────────────────────────
+    # spot > $600 → $10 increments
+    # spot $50–$600 (inclusive) → $5 increments
+    # spot < $50 → $1 increments
+    if spot > 600:
+        increment = 10
+    elif spot >= 50:
+        increment = 5
+    else:
+        increment = 1
+
+    def _on_grid(strike: float) -> bool:
+        rem = strike % increment
+        return rem < 0.01 or rem > increment - 0.01
+
+    all_strikes = sorted({c["strike"] for c in contracts})
+    grid = [s for s in all_strikes if _on_grid(s)]
+
+    if grid:
+        atm_idx = min(range(len(grid)), key=lambda i: abs(grid[i] - spot))
+        selected = set(
+            grid[max(0, atm_idx - 20) : atm_idx + 21]
+        )
+        filtered = [c for c in contracts if c["strike"] in selected]
+
+        # Fallback: fewer than 5 grid strikes on either side → use ±20% of spot
+        below = {c["strike"] for c in filtered if c["strike"] < spot}
+        above = {c["strike"] for c in filtered if c["strike"] > spot}
+        if len(below) < 5 or len(above) < 5:
+            import sys
+            print(
+                f"[WARN] Tier filter sparse (below={len(below)}, above={len(above)}). "
+                "Falling back to ±20% of spot.",
+                file=sys.stderr,
+            )
+            lo, hi = spot * 0.80, spot * 1.20
+            filtered = [c for c in contracts if lo <= c["strike"] <= hi]
+            return filtered, {
+                "mode": "fallback",
+                "label": f"Showing strikes within ±20% of ${spot:.2f} (sparse chain)",
+            }
+    else:
+        # No grid-aligned strikes at all — return everything
+        filtered = contracts
+
+    return filtered, {
+        "mode": "default",
+        "increment": increment,
+        "label": f"Showing ±20 strikes at ${increment} increments near ${spot:.2f}",
+    }
+
+
 @app.route("/api/chain")
 def api_chain():
     ticker = request.args.get("ticker", "").upper().strip()
     expiration = request.args.get("expiration", "").strip()
     if not ticker or not expiration:
         return jsonify({"error": "ticker and expiration required"}), 400
+
+    min_s = request.args.get("min_strike")
+    max_s = request.args.get("max_strike")
     try:
-        return jsonify(_fetch_chain(ticker, expiration))
+        min_strike = float(min_s) if min_s else None
+        max_strike = float(max_s) if max_s else None
+    except ValueError:
+        return jsonify({"error": "min_strike and max_strike must be numbers"}), 400
+
+    if min_strike is not None and max_strike is not None and min_strike > max_strike:
+        return jsonify(
+            {"error": f"min_strike ({min_strike:g}) must be less than max_strike ({max_strike:g})"}
+        ), 400
+
+    try:
+        full = _fetch_chain(ticker, expiration)
+        filtered, filter_info = _filter_chain(
+            full["contracts"], full["spot"], min_strike, max_strike
+        )
+        return jsonify({"spot": full["spot"], "contracts": filtered, "filter": filter_info})
     except RuntimeError as exc:
         return jsonify({"error": str(exc)}), 422
 
@@ -179,6 +278,23 @@ def api_payoff():
     g = strategy.aggregate_greeks(S, config.RISK_FREE_RATE)
     result["greeks"] = {k: round(v, 4) for k, v in g.items()}
 
+    return jsonify(result)
+
+
+@app.route("/advisor")
+def advisor():
+    return render_template("advisor.html")
+
+
+@app.route("/api/advise", methods=["POST"])
+def api_advise():
+    data = request.get_json(force=True)
+    message = str(data.get("message", "")).strip()
+    if not message:
+        return jsonify({"error": "message required"}), 400
+
+    from ai.advisor import get_advice
+    result = get_advice(message)
     return jsonify(result)
 
 

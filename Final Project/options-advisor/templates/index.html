@@ -1,61 +1,117 @@
 {% extends "base.html" %}
-{% block title %}Options Advisor{% endblock %}
-{% block main_class %}container py-5{% endblock %}
+{% block title %}Options Advisor — Build & Analyze Options Strategies{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-sm-10 col-md-7 col-lg-5">
 
-    <div class="text-center mb-4">
-      <h2 class="fw-bold mb-1">Options Strategy Builder</h2>
-      <p class="text-muted">Pull a live options chain, build multi-leg strategies,<br>
-         and get AI-powered advice — all in one place.</p>
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<section style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1e293b 100%); min-height: calc(100vh - 52px - 45px); display:flex; align-items:center">
+  <div class="w-full max-w-4xl mx-auto px-6 py-20 text-center">
+
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full text-sm font-medium"
+         style="background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd">
+      <i data-lucide="zap" style="width:14px;height:14px"></i>
+      Powered by Claude AI · Live market data
     </div>
 
-    <div class="card shadow-sm">
-      <div class="card-body p-4">
+    <!-- Headline -->
+    <h1 class="font-bold tracking-tight text-white mb-4" style="font-size:clamp(2.2rem,5vw,3.5rem); line-height:1.1">
+      Options Strategy Builder
+    </h1>
+    <p class="text-slate-300 mb-10 mx-auto" style="font-size:1.15rem; max-width:560px; line-height:1.7">
+      Build, visualize, and analyze multi-leg options strategies with AI-powered guidance.
+      Enter any US-listed ticker to get started.
+    </p>
 
-        {% if error %}
-        <div class="alert alert-danger py-2 mb-3">{{ error }}</div>
-        {% endif %}
+    <!-- Ticker search -->
+    <form method="get" action="/builder" autocomplete="off" class="mx-auto mb-6" style="max-width:440px">
+      {% if error %}
+      <div class="mb-4 px-4 py-3 rounded-lg text-sm text-left"
+           style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#fca5a5">
+        {{ error }}
+      </div>
+      {% endif %}
+      <div class="flex gap-2">
+        <input type="text" name="ticker"
+               class="flex-1 px-4 py-3 rounded-xl font-mono font-semibold text-center tracking-widest uppercase"
+               style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:white; font-size:1rem; outline:none; transition: border-color 0.15s, box-shadow 0.15s;"
+               placeholder="SPY, AAPL, TSLA…"
+               maxlength="10" autofocus required
+               onfocus="this.style.borderColor='#60a5fa'; this.style.boxShadow='0 0 0 3px rgba(96,165,250,0.2)'"
+               onblur="this.style.borderColor='rgba(255,255,255,0.15)'; this.style.boxShadow='none'">
+        <button type="submit" class="btn-primary px-6 py-3 rounded-xl text-base" style="border-radius:12px">
+          Analyze →
+        </button>
+      </div>
+      <p class="mt-2 text-xs text-slate-500">No account required · Data delayed ~15 minutes</p>
+    </form>
 
-        <form method="get" action="/builder" autocomplete="off">
-          <label class="form-label fw-semibold">Enter a US-listed ticker</label>
-          <div class="input-group input-group-lg mb-2">
-            <input type="text" name="ticker"
-                   class="form-control text-uppercase fw-bold"
-                   placeholder="SPY, AAPL, TSLA …"
-                   maxlength="10" autofocus required
-                   style="letter-spacing: 0.05em;">
-            <button type="submit" class="btn btn-primary px-4">Analyze →</button>
-          </div>
-          <div class="form-text">Data is 15-min delayed via yfinance. No account required.</div>
-        </form>
-
-      </div>
-    </div>
-
-    <div class="row g-3 mt-3 text-center">
-      <div class="col-4">
-        <div class="card card-body py-3">
-          <div class="fs-4 mb-1">📊</div>
-          <div class="small text-muted">P/L Diagram</div>
-        </div>
-      </div>
-      <div class="col-4">
-        <div class="card card-body py-3">
-          <div class="fs-4 mb-1">🧮</div>
-          <div class="small text-muted">Black-Scholes Greeks</div>
-        </div>
-      </div>
-      <div class="col-4">
-        <div class="card card-body py-3">
-          <div class="fs-4 mb-1">🤖</div>
-          <div class="small text-muted">AI Advisor</div>
-        </div>
-      </div>
-    </div>
+    <!-- Secondary CTA -->
+    <a href="/advisor"
+       class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"
+       style="text-decoration:none">
+      <i data-lucide="bot" style="width:15px;height:15px"></i>
+      Or try the AI Advisor — describe your market view in plain English
+    </a>
 
   </div>
-</div>
+</section>
+
+<!-- ── Feature highlights ──────────────────────────────────────────────── -->
+<section class="bg-white py-16 px-6">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="grid gap-8" style="grid-template-columns: repeat(3, 1fr)">
+
+      <!-- Feature 1 -->
+      <div class="text-center">
+        <div class="mx-auto mb-4 flex items-center justify-center rounded-2xl"
+             style="width:52px;height:52px;background:#eff6ff">
+          <i data-lucide="bar-chart-2" style="width:24px;height:24px;color:#2563eb"></i>
+        </div>
+        <h3 class="font-semibold text-slate-900 mb-2">Live Options Chains</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          Fetch any US-listed ticker and explore all strikes with implied volatility,
+          delta, and live mid prices.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="text-center">
+        <div class="mx-auto mb-4 flex items-center justify-center rounded-2xl"
+             style="width:52px;height:52px;background:#f0fdf4">
+          <i data-lucide="area-chart" style="width:24px;height:24px;color:#059669"></i>
+        </div>
+        <h3 class="font-semibold text-slate-900 mb-2">Visual P/L Analysis</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          Interactive payoff diagrams for any multi-leg strategy — see breakevens,
+          max profit, max loss, and aggregate Greeks at a glance.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="text-center">
+        <div class="mx-auto mb-4 flex items-center justify-center rounded-2xl"
+             style="width:52px;height:52px;background:#f5f3ff">
+          <i data-lucide="bot" style="width:24px;height:24px;color:#7c3aed"></i>
+        </div>
+        <h3 class="font-semibold text-slate-900 mb-2">AI Strategy Advice</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          Describe your market view in plain English and get a concrete, data-backed
+          options strategy built with live prices.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Disclaimer ─────────────────────────────────────────────────────── -->
+<section class="py-5 px-6 border-t border-slate-100" style="background:#f8fafc">
+  <p class="text-center text-xs text-slate-400 max-w-2xl mx-auto">
+    Educational tool only. Options data is delayed ~15 minutes via yfinance.
+    This is not financial advice — consult a licensed professional before trading options.
+  </p>
+</section>
+
 {% endblock %}

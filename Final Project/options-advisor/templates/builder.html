@@ -1,138 +1,180 @@
 {% extends "base.html" %}
 {% block title %}{{ ticker }} — Options Builder{% endblock %}
+{% block nav_builder %}active{% endblock %}
 
-{% block nav_extra %}
-<a href="/" class="btn btn-sm btn-outline-light ms-3">← New search</a>
-{% endblock %}
+{% block main_class %}max-w-screen-xl mx-auto px-3 py-3 flex-1{% endblock %}
 
 {% block content %}
-<div class="row g-3 align-items-start">
+<div class="grid gap-3" style="grid-template-columns: 1fr 390px; align-items: start">
 
-  <!-- ═══════════════════════════════════════════════════════
-       LEFT COLUMN  –  Expiration selector + chain table
-  ═══════════════════════════════════════════════════════ -->
-  <div class="col-xl-7 col-lg-7">
-    <div class="card">
+  <!-- ═══════════════════════════════════════════════════
+       LEFT — Options chain
+  ═══════════════════════════════════════════════════ -->
+  <div class="card">
 
-      <div class="card-header d-flex flex-wrap gap-2 align-items-center">
-        <span class="fw-bold fs-5 me-1">{{ ticker }}</span>
-        <span class="text-muted" id="spot-display">${{ price }}</span>
-        <div class="ms-auto d-flex align-items-center gap-2">
-          <label class="form-label mb-0 text-muted small">Expiration</label>
-          <select id="expiration-select" class="form-select form-select-sm" style="width:auto">
-            {% for exp in expirations %}
-            <option value="{{ exp }}">{{ exp }}</option>
-            {% endfor %}
-          </select>
+    <!-- Card header -->
+    <div class="card-header gap-3">
+
+      <!-- Ticker + spot -->
+      <span class="text-lg font-bold tracking-tight">{{ ticker }}</span>
+      <span class="font-mono text-slate-500 text-sm" id="spot-display">${{ price }}</span>
+
+      <!-- Expiry selector -->
+      <div class="flex items-center gap-2 ml-auto flex-wrap" style="gap:8px">
+        <label class="text-xs text-slate-400">Expiration</label>
+        <select id="expiration-select" class="form-select" style="font-size:0.82rem">
+          {% for exp in expirations %}
+          <option value="{{ exp }}">{{ exp }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Segmented filter control -->
+        <div class="flex items-center rounded-lg p-0.5" style="background:#f1f5f9; gap:2px">
+          <button id="filter-default-btn" class="filter-tab active"
+                  onclick="selectFilterMode('default')">Default</button>
+          <button id="filter-custom-btn" class="filter-tab"
+                  onclick="selectFilterMode('custom')">Custom</button>
         </div>
-      </div><!-- card-header -->
+      </div>
 
-      <div class="card-body p-0">
+    </div><!-- card-header -->
 
-        <!-- Loading state -->
-        <div id="chain-loading" class="text-center py-5 text-muted">
-          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-          Loading chain…
-        </div>
+    <!-- Custom range panel (hidden until "Custom" tab selected) -->
+    <div id="custom-range-panel" class="border-b border-slate-100 px-3 py-2"
+         style="display:none; background:#f8fafc; align-items:center; flex-wrap:wrap; gap:8px">
+      <span class="text-xs text-slate-500 font-medium">Strike range:</span>
+      <input id="min-strike" type="number" class="form-input" style="width:88px; font-size:0.82rem; padding:4px 8px" placeholder="Min">
+      <span class="text-slate-400 text-sm">–</span>
+      <input id="max-strike" type="number" class="form-input" style="width:88px; font-size:0.82rem; padding:4px 8px" placeholder="Max">
+      <button class="btn-primary" style="padding:4px 16px; font-size:0.82rem" onclick="applyCustomRange()">Apply</button>
+      <button class="text-xs text-slate-500 hover:text-slate-700 cursor-pointer bg-transparent border-none underline"
+              onclick="resetRange()">Reset to default</button>
+    </div>
 
-        <!-- Chain table (shown once loaded) -->
-        <div id="chain-container" class="d-none">
-          <div class="chain-scroll">
-            <table class="table table-sm table-hover chain-table mb-0">
-              <thead class="table-dark">
-                <tr>
-                  <th colspan="4" class="text-center border-end py-1">— CALLS —</th>
-                  <th class="text-center strike-col py-1">Strike</th>
-                  <th colspan="4" class="text-center border-start py-1">— PUTS —</th>
-                </tr>
-                <tr class="small">
-                  <th class="text-end">IV</th>
-                  <th class="text-end">Δ</th>
-                  <th class="text-end">Mid</th>
-                  <th class="text-center border-end">Add</th>
-                  <th class="text-center strike-col"></th>
-                  <th class="text-center border-start">Add</th>
-                  <th class="text-start">Mid</th>
-                  <th class="text-start">IV</th>
-                  <th class="text-start">Δ</th>
-                </tr>
-              </thead>
-              <tbody id="chain-body"></tbody>
-            </table>
-          </div><!-- chain-scroll -->
-        </div><!-- chain-container -->
+    <!-- Active filter label -->
+    <div id="filter-label" class="px-3 py-1 text-xs text-slate-500 border-b border-slate-100" style="display:none"></div>
 
-        <div id="chain-error" class="d-none alert alert-danger m-3 mb-2"></div>
+    <!-- Loading skeleton -->
+    <div id="chain-loading" class="py-4 px-3">
+      <div class="flex items-center gap-2 text-xs text-slate-400 mb-3">
+        <div class="rounded-full border-2 border-slate-200 border-t-blue-500"
+             style="width:12px;height:12px;animation:spin 0.8s linear infinite"></div>
+        Loading options chain…
+      </div>
+      {% for _ in range(10) %}
+      <div class="skeleton-row">
+        <div class="skeleton-cell" style="width:36px"></div>
+        <div class="skeleton-cell" style="width:36px"></div>
+        <div class="skeleton-cell" style="width:48px"></div>
+        <div class="skeleton-cell" style="width:56px"></div>
+        <div class="skeleton-cell flex-1" style="max-width:70px"></div>
+        <div class="skeleton-cell" style="width:56px"></div>
+        <div class="skeleton-cell" style="width:48px"></div>
+        <div class="skeleton-cell" style="width:36px"></div>
+        <div class="skeleton-cell" style="width:36px"></div>
+      </div>
+      {% endfor %}
+    </div>
 
-      </div><!-- card-body -->
-    </div><!-- card -->
+    <!-- Chain table (shown once loaded) -->
+    <div id="chain-container" class="hidden">
+      <div class="chain-scroll">
+        <table class="chain-table">
+          <thead>
+            <tr>
+              <th colspan="4" class="text-center" style="border-right:1px solid #334155">— CALLS —</th>
+              <th class="strike-col text-center"></th>
+              <th colspan="4" class="text-center" style="border-left:1px solid #334155">— PUTS —</th>
+            </tr>
+            <tr>
+              <th class="text-right" data-tip="Implied Volatility — market's forecast of future price swings">IV</th>
+              <th class="text-right" data-tip="Delta — P/L change per $1 move in the stock (0 to 1 for calls)">Δ</th>
+              <th class="text-right" data-tip="Mid price — midpoint of the bid/ask spread">Mid</th>
+              <th class="text-center" style="border-right:1px solid #334155" data-tip="Add this leg Long (L) or Short (S) to your strategy">Add</th>
+              <th class="strike-col text-center" data-tip="Strike price">K</th>
+              <th class="text-center" style="border-left:1px solid #334155" data-tip="Add this leg Long (L) or Short (S) to your strategy">Add</th>
+              <th class="text-left" data-tip="Mid price — midpoint of the bid/ask spread">Mid</th>
+              <th class="text-left" data-tip="Implied Volatility">IV</th>
+              <th class="text-left" data-tip="Delta — P/L change per $1 move in the stock (-1 to 0 for puts)">Δ</th>
+            </tr>
+          </thead>
+          <tbody id="chain-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="chain-error" class="hidden m-3 p-3 rounded-lg text-sm"
+         style="background:#fef2f2; border:1px solid #fecaca; color:#991b1b"></div>
+
   </div><!-- left col -->
 
 
-  <!-- ═══════════════════════════════════════════════════════
-       RIGHT COLUMN  –  Legs + Chart + Metrics
-  ═══════════════════════════════════════════════════════ -->
-  <div class="col-xl-5 col-lg-5">
+  <!-- ═══════════════════════════════════════════════════
+       RIGHT — Strategy legs + chart + metrics
+  ═══════════════════════════════════════════════════ -->
+  <div class="flex flex-col gap-3">
 
-    <!-- Legs panel -->
-    <div class="card mb-3">
-      <div class="card-header d-flex justify-content-between align-items-center py-2">
-        <span class="fw-semibold">Strategy Legs</span>
-        <button class="btn btn-sm btn-outline-secondary" onclick="clearLegs()">Clear all</button>
+    <!-- Strategy Legs -->
+    <div class="card">
+      <div class="card-header justify-between">
+        <span>Strategy Legs</span>
+        <button class="btn-danger-sm" onclick="clearLegs()">Clear all</button>
       </div>
-      <div class="card-body py-2 px-3">
-        <div id="legs-empty" class="text-muted small py-1">
-          No legs added yet. Click <kbd>L</kbd> or <kbd>S</kbd> on the chain.
+      <div class="p-3">
+        <div id="legs-empty" class="text-center text-slate-400 text-sm py-3">
+          No legs yet — click <kbd>L</kbd> or <kbd>S</kbd> on any strike row.
         </div>
         <div id="legs-list"></div>
       </div>
     </div>
 
     <!-- P/L Chart -->
-    <div class="card mb-3">
-      <div class="card-header py-2 fw-semibold">P / L at Expiration</div>
-      <div class="card-body p-1">
-        <div id="chart-placeholder" class="text-center text-muted py-4 small">
-          Add at least one leg to see the P/L diagram.
+    <div class="card">
+      <div class="card-header">P / L at Expiration</div>
+      <div class="p-1">
+        <div id="chart-placeholder" class="text-center text-slate-400 text-sm py-8 px-4">
+          <i data-lucide="area-chart" style="width:28px;height:28px;margin:0 auto 8px;display:block;color:#cbd5e1"></i>
+          Add at least one leg to see the payoff diagram.
         </div>
-        <div id="chart" style="height:300px; display:none;"></div>
+        <div id="chart" style="height:280px; display:none;"></div>
       </div>
     </div>
 
-    <!-- Metrics + Greeks (hidden until legs added) -->
+    <!-- Position Summary (hidden until legs added) -->
     <div id="metrics-card" class="card" style="display:none">
-      <div class="card-header py-2 fw-semibold">Position Summary</div>
-      <div class="card-body p-2">
+      <div class="card-header">Position Summary</div>
+      <div class="p-3">
 
-        <table class="table table-sm mb-3">
+        <table class="metrics-table mb-3">
           <tbody>
             <tr>
-              <td class="text-muted">Net Debit / Credit</td>
-              <td id="m-net" class="fw-bold text-end"></td>
+              <td class="text-slate-500">Net Debit / Credit</td>
+              <td id="m-net"></td>
             </tr>
             <tr>
-              <td class="text-muted">Max Profit</td>
-              <td id="m-max-profit" class="fw-bold text-success text-end"></td>
+              <td class="text-slate-500">Max Profit</td>
+              <td id="m-max-profit" class="text-emerald-600"></td>
             </tr>
             <tr>
-              <td class="text-muted">Max Loss</td>
-              <td id="m-max-loss" class="fw-bold text-danger text-end"></td>
+              <td class="text-slate-500">Max Loss</td>
+              <td id="m-max-loss" class="text-red-600"></td>
             </tr>
             <tr>
-              <td class="text-muted">Breakeven(s)</td>
-              <td id="m-breakevens" class="text-end"></td>
+              <td class="text-slate-500">Breakeven(s)</td>
+              <td id="m-breakevens"></td>
             </tr>
           </tbody>
         </table>
 
-        <div class="small fw-semibold text-muted mb-1">Aggregate Greeks</div>
-        <table class="table table-sm text-center mb-0">
-          <thead class="table-light">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Aggregate Greeks</div>
+        <table class="greeks-table">
+          <thead>
             <tr>
-              <th>Delta (Δ)</th>
-              <th>Gamma (Γ)</th>
-              <th>Theta (Θ)/day</th>
-              <th>Vega (ν)/1%σ</th>
+              <th data-tip="Directional exposure — net $ change per $1 stock move">Δ Delta</th>
+              <th data-tip="Rate of delta change per $1 stock move">Γ Gamma</th>
+              <th data-tip="Daily time decay — P/L lost per calendar day">Θ Theta</th>
+              <th data-tip="Vega — P/L change per 1% rise in implied volatility">ν Vega</th>
             </tr>
           </thead>
           <tbody>
@@ -149,12 +191,17 @@
     </div><!-- metrics-card -->
 
   </div><!-- right col -->
-</div><!-- row -->
+
+</div><!-- grid -->
+
+<!-- Spinner keyframe (for skeleton loader) -->
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
 {% endblock %}
 
 
 {% block scripts %}
-<!-- Inject Flask variables for JavaScript -->
 <script>
   const TICKER      = {{ ticker | tojson }};
   const SPOT        = {{ price }};

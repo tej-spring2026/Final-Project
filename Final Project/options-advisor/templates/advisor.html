@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}AI Advisor — Options Advisor{% endblock %}
+{% block nav_advisor %}active{% endblock %}
+
+{% block main_class %}max-w-screen-xl mx-auto px-3 py-3 flex-1{% endblock %}
+
+{% block content %}
+<div class="grid gap-3" style="grid-template-columns: 1.5fr 1fr; height: calc(100vh - 52px - 45px - 24px); align-items: start">
+
+  <!-- ═══════════════════════════════════════════════════
+       LEFT — Chat panel
+  ═══════════════════════════════════════════════════ -->
+  <div class="card flex flex-col" style="height:100%; min-height:0">
+
+    <!-- Header -->
+    <div class="card-header shrink-0">
+      <i data-lucide="bot" style="width:16px;height:16px;color:#7c3aed;margin-right:6px;flex-shrink:0"></i>
+      AI Options Advisor
+      <span class="text-slate-400 text-xs font-normal ml-1">Powered by Claude</span>
+    </div>
+
+    <!-- Prompt chips -->
+    <div class="px-3 py-2 border-b border-slate-100 shrink-0 flex flex-wrap gap-2">
+      <button class="prompt-chip" onclick="fillPrompt(this)">I'm bullish on TSLA short-term</button>
+      <button class="prompt-chip" onclick="fillPrompt(this)">Hedge my AAPL long position</button>
+      <button class="prompt-chip" onclick="fillPrompt(this)">Generate income on a flat market</button>
+      <button class="prompt-chip" onclick="fillPrompt(this)">Bet on volatility around earnings</button>
+    </div>
+
+    <!-- Message history -->
+    <div id="messages" class="flex-1 overflow-auto p-3" style="min-height:0">
+      <div id="welcome-msg" class="text-center text-slate-400 text-sm py-10">
+        <i data-lucide="message-circle" style="width:32px;height:32px;display:block;margin:0 auto 10px;color:#cbd5e1"></i>
+        Describe your market view and I'll suggest a concrete strategy.<br>
+        <em class="text-slate-500" style="font-style:italic">e.g. "I'm bullish on NVDA for the next 6 weeks"</em>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="p-3 border-t border-slate-200 shrink-0">
+      <textarea id="user-input"
+                class="form-input w-full mb-2"
+                style="resize:none; min-height:56px; font-size:0.875rem"
+                rows="2"
+                placeholder="Describe your market view… e.g. 'I think TSLA stays between $250 and $300 for 30 days'"
+                onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }"></textarea>
+      <div class="flex items-center">
+        <span id="thinking" class="text-xs text-slate-400 hidden flex items-center gap-1.5">
+          <span class="rounded-full border-2 border-slate-300 border-t-blue-500 inline-block"
+                style="width:11px;height:11px;animation:spin 0.8s linear infinite"></span>
+          Claude is analyzing…
+        </span>
+        <button class="btn-primary ml-auto" onclick="sendMessage()" id="send-btn">
+          Ask Claude →
+        </button>
+      </div>
+    </div>
+
+  </div><!-- left -->
+
+
+  <!-- ═══════════════════════════════════════════════════
+       RIGHT — Strategy preview panel
+  ═══════════════════════════════════════════════════ -->
+  <div class="flex flex-col gap-3 overflow-auto" style="height:100%; min-height:0">
+
+    <!-- Empty placeholder -->
+    <div id="preview-placeholder" class="card flex-1 flex items-center justify-center" style="min-height:200px">
+      <div class="text-center text-slate-400 text-sm p-6">
+        <i data-lucide="bar-chart-2" style="width:32px;height:32px;display:block;margin:0 auto 10px;color:#cbd5e1"></i>
+        Ask the advisor to suggest a strategy and the payoff chart will appear here.
+      </div>
+    </div>
+
+    <!-- Chart card (hidden until strategy built) -->
+    <div id="advisor-chart-card" class="card" style="display:none">
+      <div class="card-header justify-between">
+        P / L at Expiration
+        <a id="load-builder-btn" href="#"
+           class="text-xs font-medium flex items-center gap-1"
+           style="color:#2563eb; text-decoration:none">
+          <i data-lucide="external-link" style="width:12px;height:12px"></i>
+          Load into Builder
+        </a>
+      </div>
+      <div class="p-1">
+        <div id="advisor-chart" style="height:260px"></div>
+      </div>
+    </div>
+
+    <!-- Position Summary (hidden until strategy built) -->
+    <div id="metrics-card" class="card" style="display:none">
+      <div class="card-header">Position Summary</div>
+      <div class="p-3">
+
+        <table class="metrics-table mb-3">
+          <tbody>
+            <tr>
+              <td class="text-slate-500">Net Debit / Credit</td>
+              <td id="m-net"></td>
+            </tr>
+            <tr>
+              <td class="text-slate-500">Max Profit</td>
+              <td id="m-max-profit" class="text-emerald-600"></td>
+            </tr>
+            <tr>
+              <td class="text-slate-500">Max Loss</td>
+              <td id="m-max-loss" class="text-red-600"></td>
+            </tr>
+            <tr>
+              <td class="text-slate-500">Breakeven(s)</td>
+              <td id="m-breakevens"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Aggregate Greeks</div>
+        <table class="greeks-table">
+          <thead>
+            <tr>
+              <th>Δ Delta</th>
+              <th>Γ Gamma</th>
+              <th>Θ Theta/day</th>
+              <th>ν Vega/1%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="g-delta">—</td>
+              <td id="g-gamma">—</td>
+              <td id="g-theta">—</td>
+              <td id="g-vega">—</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div><!-- metrics-card -->
+
+  </div><!-- right -->
+
+</div><!-- grid -->
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let advisorSpot   = null;
+let advisorTicker = null;
+
+// ── Prompt chips ──────────────────────────────────────────────────────────────
+function fillPrompt(btn) {
+  document.getElementById("user-input").value = btn.textContent.trim();
+  document.getElementById("user-input").focus();
+}
+
+// ── Send message ──────────────────────────────────────────────────────────────
+async function sendMessage() {
+  const input   = document.getElementById("user-input");
+  const message = input.value.trim();
+  if (!message) return;
+
+  input.value = "";
+  document.getElementById("welcome-msg")?.remove();
+  appendMessage("user", message);
+
+  document.getElementById("send-btn").disabled = true;
+  document.getElementById("thinking").classList.remove("hidden");
+
+  try {
+    const resp = await fetch("/api/advise", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ message }),
+    });
+    const data = await resp.json();
+
+    if (data.error) { appendMessage("error", data.error); return; }
+
+    appendMessage("assistant", data.text);
+
+    if (data.strategy && data.strategy.length > 0 && data.spot) {
+      advisorSpot   = data.spot;
+      advisorTicker = data.ticker || null;
+      await renderAdvisorPayoff(data.strategy, data.spot, data.ticker);
+    }
+  } catch (err) {
+    appendMessage("error", "Request failed: " + err.message);
+  } finally {
+    document.getElementById("send-btn").disabled = false;
+    document.getElementById("thinking").classList.add("hidden");
+  }
+}
+
+// ── Append chat bubble ────────────────────────────────────────────────────────
+function appendMessage(role, text) {
+  const container = document.getElementById("messages");
+
+  const wrap   = document.createElement("div");
+  wrap.className = role === "user"
+    ? "flex justify-end mb-2"
+    : "flex justify-start mb-2";
+
+  const bubble = document.createElement("div");
+  bubble.className = "chat-bubble " + (
+    role === "user"      ? "user-bubble" :
+    role === "error"     ? "error-bubble" :
+                           "assistant-bubble"
+  );
+  bubble.innerHTML = text.replace(/\n/g, "<br>");
+
+  wrap.appendChild(bubble);
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+}
+
+// ── Render advisor payoff ─────────────────────────────────────────────────────
+async function renderAdvisorPayoff(legs, spot, ticker) {
+  try {
+    const resp = await fetch("/api/payoff", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ legs, spot }),
+    });
+    const data = await resp.json();
+    if (data.error) { console.error("Payoff error:", data.error); return; }
+
+    // Hide placeholder, show chart + metrics
+    document.getElementById("preview-placeholder").style.display = "none";
+    document.getElementById("advisor-chart-card").style.display = "";
+    document.getElementById("metrics-card").style.display = "";
+
+    drawAdvisorChart(data, spot);
+    fillMetrics(data);
+
+    // Set up "Load into Builder" button
+    if (ticker) {
+      try {
+        sessionStorage.setItem("advisorStrategy", JSON.stringify({ ticker, spot, legs }));
+      } catch(e) {}
+      const btn = document.getElementById("load-builder-btn");
+      btn.href = `/builder?ticker=${encodeURIComponent(ticker)}`;
+    }
+
+    // Re-run lucide so the external-link icon renders
+    if (typeof lucide !== "undefined") lucide.createIcons();
+
+  } catch (err) {
+    console.error("renderAdvisorPayoff:", err);
+  }
+}
+
+// ── Plotly chart ──────────────────────────────────────────────────────────────
+function drawAdvisorChart(data, spot) {
+  const prices = data.price_range;
+  const pnl    = data.pnl;
+  const yMin   = Math.min(...pnl), yMax = Math.max(...pnl);
+  const yPad   = (yMax - yMin) * 0.08 || 50;
+
+  const traces = [
+    { x: prices, y: pnl.map(v => Math.max(v, 0)), type: "scatter", mode: "lines",
+      fill: "tozeroy", fillcolor: "rgba(5,150,105,0.10)",
+      line: { color: "transparent" }, hoverinfo: "skip", showlegend: false },
+    { x: prices, y: pnl.map(v => Math.min(v, 0)), type: "scatter", mode: "lines",
+      fill: "tozeroy", fillcolor: "rgba(220,38,38,0.10)",
+      line: { color: "transparent" }, hoverinfo: "skip", showlegend: false },
+    { x: prices, y: pnl, type: "scatter", mode: "lines", name: "P/L at expiry",
+      line: { color: "#2563eb", width: 2.5 },
+      hovertemplate: "<b>$%{x:.2f}</b><br>P/L: $%{y:,.0f}<extra></extra>" },
+  ];
+
+  const shapes = [
+    { type: "line", x0: prices[0], x1: prices.at(-1), y0: 0, y1: 0,
+      line: { color: "#94a3b8", width: 1, dash: "dot" } },
+    { type: "line", x0: spot, x1: spot, y0: yMin - yPad, y1: yMax + yPad,
+      line: { color: "#f59e0b", width: 1.5, dash: "dash" } },
+    ...data.breakevens.map(be => ({
+      type: "line", x0: be, x1: be, y0: yMin - yPad, y1: yMax + yPad,
+      line: { color: "#059669", width: 1, dash: "dash" },
+    })),
+  ];
+
+  const annotations = [
+    { x: spot, y: yMax + yPad, text: `Spot<br>$${spot}`,
+      showarrow: false, font: { size: 10, color: "#f59e0b" }, yanchor: "bottom" },
+    ...data.breakevens.map(be => ({
+      x: be, y: yMin - yPad, text: `BE<br>$${be}`,
+      showarrow: false, font: { size: 10, color: "#059669" }, yanchor: "top",
+    })),
+  ];
+
+  Plotly.react("advisor-chart", traces, {
+    margin: { l: 52, r: 12, t: 10, b: 42 },
+    xaxis: { title: { text: "Underlying Price ($)", font: { size: 11 } }, gridcolor: "#f1f5f9", tickfont: { family: "JetBrains Mono", size: 10 } },
+    yaxis: { title: { text: "P / L ($)", font: { size: 11 } }, tickformat: ",.0f", gridcolor: "#f1f5f9", zeroline: false, tickfont: { family: "JetBrains Mono", size: 10 } },
+    paper_bgcolor: "#fff", plot_bgcolor: "#fff",
+    shapes, annotations,
+    legend: { orientation: "h", y: -0.2 },
+    font: { family: "Inter, system-ui, sans-serif", size: 11 },
+  }, { responsive: true, displayModeBar: false });
+}
+
+// ── Fill metrics + Greeks ─────────────────────────────────────────────────────
+function fillMetrics(data) {
+  const net = data.net_debit_credit;
+  document.getElementById("m-net").innerHTML = net >= 0
+    ? `<span style="color:#dc2626">$${net.toFixed(2)} debit</span>`
+    : `<span style="color:#059669">$${Math.abs(net).toFixed(2)} credit</span>`;
+
+  document.getElementById("m-max-profit").innerHTML = data.max_profit == null
+    ? '<span style="color:#94a3b8">Unlimited ∞</span>'
+    : `$${data.max_profit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  document.getElementById("m-max-loss").innerHTML = data.max_loss == null
+    ? '<span style="color:#94a3b8">Unlimited ∞</span>'
+    : `-$${Math.abs(data.max_loss).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  document.getElementById("m-breakevens").textContent =
+    data.breakevens.length ? data.breakevens.map(b => `$${b}`).join(", ") : "None";
+
+  const g = data.greeks;
+  document.getElementById("g-delta").textContent = g.delta.toFixed(3);
+  document.getElementById("g-gamma").textContent = g.gamma.toFixed(4);
+  document.getElementById("g-theta").textContent = g.theta.toFixed(4);
+  document.getElementById("g-vega").textContent  = g.vega.toFixed(4);
+}
+</script>
+{% endblock %}
