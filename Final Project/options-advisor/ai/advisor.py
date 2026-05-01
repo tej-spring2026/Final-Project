@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import anthropic
 
-import config
 from ai.tools import TOOLS, execute_tool
 
 MODEL = "claude-sonnet-4-6"
@@ -38,6 +37,23 @@ Rules:
 - Keep the explanation concise and focused on the risk/reward tradeoff."""
 
 
+def validate_api_key(key: str) -> bool:
+    if not key:
+        return False
+    try:
+        client = anthropic.Anthropic(api_key=key)
+        client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1,
+            messages=[{"role": "user", "content": "hi"}],
+        )
+        return True
+    except anthropic.AuthenticationError:
+        return False
+    except Exception:
+        return False
+
+
 def get_advice(user_message: str) -> dict:
     """
     Run a full Claude tool-use loop for one user query.
@@ -49,15 +65,17 @@ def get_advice(user_message: str) -> dict:
             "spot":     float | None, # spot price used in calculate_payoff
         }
     """
-    if not config.ANTHROPIC_API_KEY:
+    from flask import session
+    api_key = session.get("api_key", "")
+    if not api_key:
         return {
-            "text": "ANTHROPIC_API_KEY is not set. Add it to your .env file to enable the AI advisor.",
+            "text": "No API key found in session. Please sign in again.",
             "strategy": None,
             "spot": None,
             "ticker": None,
         }
 
-    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    client = anthropic.Anthropic(api_key=api_key)
     messages = [{"role": "user", "content": user_message}]
 
     final_text = ""

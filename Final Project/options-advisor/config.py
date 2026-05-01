@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-only-insecure-key")
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
 
 # Risk-free rate: 3-Month US Treasury Bill yield (short-dated options).

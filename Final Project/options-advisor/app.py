@@ -2,9 +2,10 @@
 Flask entry point — routes only, no business logic.
 Business logic lives in pricing/, data/, and ai/.
 """
-from datetime import date
+from datetime import date, timedelta
+from functools import wraps
 
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from flask_caching import Cache
 
 import config
@@ -15,8 +16,24 @@ from pricing.strategies import Leg, Strategy
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
+app.permanent_session_lifetime = timedelta(hours=24)
 
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache"})
+
+
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
+
+def require_api_key(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if "api_key" not in session:
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "Authentication required"}), 401
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
 
 if config.DATA_PROVIDER == "tradier":
     from data.tradier_provider import TradierProvider
@@ -33,12 +50,34 @@ else:
 # Pages
 # ---------------------------------------------------------------------------
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST":
+        key = request.form.get("api_key", "").strip()
+        from ai.advisor import validate_api_key
+        if validate_api_key(key):
+            session.permanent = True
+            session["api_key"] = key
+            return redirect(url_for("index"))
+        error = "Invalid API key. Please try again."
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
 @app.route("/")
+@require_api_key
 def index():
     return render_template("index.html")
 
 
 @app.route("/builder")
+@require_api_key
 def builder():
     ticker = request.args.get("ticker", "").upper().strip()
     if not ticker:
@@ -67,6 +106,7 @@ def _fetch_quote(ticker: str) -> dict:
 
 
 @app.route("/api/quote")
+@require_api_key
 def api_quote():
     ticker = request.args.get("ticker", "").upper().strip()
     if not ticker:
@@ -207,6 +247,7 @@ def _filter_chain(
 
 
 @app.route("/api/chain")
+@require_api_key
 def api_chain():
     ticker = request.args.get("ticker", "").upper().strip()
     expiration = request.args.get("expiration", "").strip()
@@ -237,6 +278,7 @@ def api_chain():
 
 
 @app.route("/api/payoff", methods=["POST"])
+@require_api_key
 def api_payoff():
     data = request.get_json(force=True)
     legs_raw = data.get("legs", [])
@@ -282,11 +324,13 @@ def api_payoff():
 
 
 @app.route("/advisor")
+@require_api_key
 def advisor():
     return render_template("advisor.html")
 
 
 @app.route("/api/advise", methods=["POST"])
+@require_api_key
 def api_advise():
     data = request.get_json(force=True)
     message = str(data.get("message", "")).strip()

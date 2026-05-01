@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Options Advisor — Sign In</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 min-h-screen flex items-center justify-center">
+
+<div class="w-full max-w-sm px-4">
+
+  <!-- Logo + tagline -->
+  <div class="text-center mb-8">
+    <div class="flex items-center justify-center gap-2 mb-3">
+      <i data-lucide="trending-up" style="width:30px;height:30px;color:#2563eb;flex-shrink:0"></i>
+      <span class="text-2xl font-bold tracking-tight text-slate-900">Options Advisor</span>
+    </div>
+    <p class="text-sm text-slate-500">Professional options strategy analysis powered by AI</p>
+  </div>
+
+  <!-- Card -->
+  <div class="card p-7">
+    <h1 class="text-base font-semibold text-slate-800 mb-1">Enter your API key</h1>
+    <p class="text-xs text-slate-400 mb-5 leading-relaxed">
+      Your Anthropic API key powers the AI strategy advisor. It is validated on sign-in and stored only in your encrypted session.
+    </p>
+
+    {% if error %}
+    <div class="mb-4 flex items-start gap-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg">
+      <i data-lucide="alert-circle" style="width:15px;height:15px;color:#dc2626;flex-shrink:0;margin-top:1px"></i>
+      <span class="text-sm text-red-700">{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <form method="post" id="login-form">
+      <div class="mb-4">
+        <label class="block text-xs font-medium text-slate-600 mb-1.5" for="api_key">
+          Anthropic API Key
+        </label>
+        <input
+          type="password"
+          id="api_key"
+          name="api_key"
+          class="form-input w-full font-mono text-sm"
+          placeholder="sk-ant-api03-…"
+          autocomplete="off"
+          spellcheck="false"
+          required
+          autofocus
+        >
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+        <span id="btn-label">Get Access</span>
+        <i data-lucide="arrow-right" id="btn-icon" style="width:15px;height:15px"></i>
+        <svg id="btn-spinner" class="hidden animate-spin" style="width:15px;height:15px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+      </button>
+    </form>
+
+    <p class="mt-5 text-center text-xs text-slate-400">
+      Don't have a key?
+      <a href="mailto:tbikkasani1@gmail.com" class="text-slate-500 hover:text-slate-700 transition-colors underline-offset-2 hover:underline">
+        Contact the developer for access.
+      </a>
+    </p>
+  </div>
+
+  <p class="mt-5 text-center text-xs text-slate-400">
+    © 2025 Options Advisor · Educational use only · Not financial advice
+  </p>
+
+</div>
+
+<script>
+  document.getElementById('login-form').addEventListener('submit', function () {
+    const btn = document.getElementById('submit-btn');
+    const label = document.getElementById('btn-label');
+    const icon = document.getElementById('btn-icon');
+    const spinner = document.getElementById('btn-spinner');
+    btn.disabled = true;
+    label.textContent = 'Validating…';
+    icon.classList.add('hidden');
+    spinner.classList.remove('hidden');
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  });
+</script>
+
+</body>
+</html>
