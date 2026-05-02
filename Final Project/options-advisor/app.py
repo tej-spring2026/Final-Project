@@ -2,6 +2,7 @@
 Flask entry point — routes only, no business logic.
 Business logic lives in pricing/, data/, and ai/.
 """
+import os
 from datetime import date, timedelta
 from functools import wraps
 
@@ -342,5 +343,6 @@ def api_advise():
     return jsonify(result)
 
 
-if __name__ == "__main__":
-    app.run(debug=config.DEBUG)
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
