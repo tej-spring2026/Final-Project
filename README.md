@@ -1,15 +1,17 @@
-# OIM3640
+## AI Options Advisor README
 
-This is my course repository for OIM3640.
 
-## About Me
-- Name: Tej Bikkasani   
-- Concentration: Finance
-- Interests: Finance, Tech, Sports
+## What the application does
+Options Advisor is a Flask web application that lets users visualize and analyze options strategies on any US-listed equity. Users can pull live options chains, build single- or multi-leg strategies, and see interactive P/L diagrams with Greeks (delta, gamma, theta, vega) computed via a Black-Scholes pricing engine. An AI advisor powered by Claude accepts plain-English market views ("I think TSLA stays flat for 30 days") and recommends concrete strategies with full risk/reward analysis.
 
-# My projects
-- [Mini Project 1](https://github.com/tej-spring2026/oim3640/tree/main/Project%201)
-- [Mini Project 2](https://github.com/tej-spring2026/oim3640/tree/main/Mini%20Project%202)
-- [Mini Project 3](https://github.com/tej-spring2026/oim3640/tree/main/Mini%20Project%203)
-- [Elective Project 1](https://github.com/tej-spring2026/oim3640/tree/main/Elective%20Project%201)
-- [Final Project](https://github.com/tej-spring2026/oim3640/tree/main/Final%20Project)
+## How to run the application
+Step 1: Go to following [Final Project URL](https://final-options-advisor.onrender.com)
+
+Step 2: Enter a valid Anthopic API Key (Follow instructions on page if you don't have one)
+
+Step 3: Click enter and enjoy my AI options strategy builder application!!
+
+
+## Any required API keys or setup steps
+- Anthropic API Key is needed for the application. When you visit the app, you will be prompted to enter your key on the login screen; it is validated against the Anthropic API and stored in an encrypted session for 24 hours, never persisted on the server. 
+- Options chain data is sourced via yfinance with approximately 15-minute delay and requires no API key or signup.
